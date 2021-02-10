@@ -34,6 +34,7 @@ func main() {
 	r.HandleFunc("/task", createTask).Methods("POST")
 	r.HandleFunc("/task/{id}", getTask).Methods("GET")
 	r.HandleFunc("/task/{id}", deleteTask).Methods("DELETE")
+	r.HandleFunc("/task/{id}", updateTask).Methods("PUT")
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", r))
@@ -97,6 +98,34 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 		if task.ID == taskID {
 			w.Header().Set("Content-type", "application/json")
 			json.NewEncoder(w).Encode(task)
+		}
+	}
+
+}
+
+func updateTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	taskID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		fmt.Print("ID invalid")
+		return
+	}
+	var updatedTask task
+	reqBody, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		fmt.Print("Insert a Valid Data!")
+	}
+
+	json.Unmarshal(reqBody, &updatedTask)
+
+	for i, task := range tasks {
+		if task.ID == taskID {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			updatedTask.ID = taskID
+			tasks = append(tasks, updatedTask)
+			fmt.Fprintf(w, "The task with the Id %v has been updates succesfully")
+
 		}
 	}
 

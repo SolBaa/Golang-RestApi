@@ -44,8 +44,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// CompileDaemon --command="./ApiRest.exe"
-
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
@@ -71,6 +69,19 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	taskID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		fmt.Print("ID invalid")
+		return
+	}
+
+	for i, task := range tasks {
+		if task.ID == taskID {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			fmt.Fprintf(w, "The task with ID %v has been removed succesfully ", taskID)
+		}
+	}
 
 }
 
@@ -85,7 +96,6 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 	for _, task := range tasks {
 		if task.ID == taskID {
 			w.Header().Set("Content-type", "application/json")
-
 			json.NewEncoder(w).Encode(task)
 		}
 	}
